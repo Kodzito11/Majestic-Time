@@ -3,67 +3,69 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace WatchLibrary
 	{
-		public class WatchRepository
+	public class WatchRepository
+	{
+		private int _nextId = 1; // Holder styr på næste unikke ID
+		private readonly List<Watch> _watches = new(); // Liste over ure
+
+		public WatchRepository()
 		{
-			private int _nextId = 1; // Holder styr på næste unikke ID
-			private readonly List<User> _watches = new(); // Liste over brugere
-
-			public WatchRepository()
-			{
-				// Tilføjer nogle startbrugere ved oprettelse af repository
-				_watches.Add(new User { Id = _nextId++, Username = "Roman", Email = "roman@example.com", Password = "hashedpassword1" });
-				_watches.Add(new User { Id = _nextId++, Username = "Kodo", Email = "kodo@example.com", Password = "hashedpassword2" });
-				_watches.Add(new User { Id = _nextId++, Username = "Joutiar", Email = "Joutiar@example.com", Password = "hashedpassword3" });
-			}
-
-			public List<User> GetAll()
-			{
-				// Returnerer en kopi af listen for at beskytte interne data
-				return new List<User>(_watches);
-			}
-
-			public User? GetById(int id)
-			{
-				// Finder en bruger baseret på ID
-				return _watches.Find(user => user.Id == id);
-			}
-
-			public User Add(User user)
-			{
-				// Validerer bruger før tilføjelse
-				user.Validate();
-				user.Id = _nextId++; // Tildeler et unikt ID
-				_watches.Add(user);
-				return user;
-			}
-
-			public User? Remove(int id)
-			{
-				// Finder brugeren, der skal fjernes
-				User? user = GetById(id);
-				if (user == null)
-				{
-					return null; // Returnerer null, hvis brugeren ikke findes
-				}
-				_watches.Remove(user);
-				return user;
-			}
-
-			public User? Update(int id, User user)
-			{
-				user.Validate();
-				User? existingUser = GetById(id);
-				if (existingUser == null)
-				{
-					return null;
-				}
-				existingUser.Username = user.Username;
-				existingUser.Email = user.Email;
-				existingUser.Password = user.Password;
-				return existingUser;
-			}
+			// Tilføjer nogle starture ved oprettelse af repository
+			_watches.Add(new Watch { Id = _nextId++, Brand = "Rolex", Model = "Hulk", ReferenceNumber = "783289", Year = 1900, Accessories = "Med certifikat", Functions = "Special", Size = 40, Condition = 9 });
+			_watches.Add(new Watch { Id = _nextId++, Brand = "Hublot", Model = "Big Bang", ReferenceNumber = "783289", Year = 2000, Accessories = "Med certifikat", Functions = "Special", Size = 40, Condition = 9 });
+			_watches.Add(new Watch { Id = _nextId++, Brand = "Seiko", Model = "Prospex", ReferenceNumber = "783289", Year = 1900, Accessories = "Med certifikat", Functions = "Special", Size = 40, Condition = 9 });
 		}
+
+		public List<Watch> GetAll()
+		{
+			// Returnerer en kopi af listen for at beskytte interne data
+			return new List<Watch>(_watches);
+		}
+
+		public Watch? GetById(int id)
+		{
+			// Finder et ur baseret på ID
+			return _watches.Find(watch => watch.Id == id);
+		}
+
+		public Watch Add(Watch watch)
+		{
+			// Validerer ur før tilføjelse
+			watch.Id = _nextId++; // Tildeler et unikt ID
+			_watches.Add(watch);
+			return watch;
+		}
+
+		public Watch? Remove(int id)
+		{
+			// Finder uret, der skal fjernes
+			Watch? watch = GetById(id);
+			if (watch == null)
+			{
+				return null; // Returnerer null, hvis uret ikke findes
+			}
+			_watches.Remove(watch);
+			return watch;
+		}
+
+		public Watch? Update(int id, Watch watch)
+		{
+			Watch? existingWatch = GetById(id);
+			if (existingWatch == null)
+			{
+				return null;
+			}
+			existingWatch.Brand = watch.Brand;
+			existingWatch.Model = watch.Model;
+			existingWatch.ReferenceNumber = watch.ReferenceNumber;
+			existingWatch.Year = watch.Year;
+			existingWatch.Accessories = watch.Accessories;
+			existingWatch.Functions = watch.Functions;
+			existingWatch.Size = watch.Size;
+			existingWatch.Condition = watch.Condition;
+			return existingWatch;
+		}
+	}
 	}
