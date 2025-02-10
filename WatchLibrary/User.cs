@@ -4,13 +4,6 @@ using System.Text.RegularExpressions;
 
 namespace WatchLibrary
 {
-
-    public enum UserRole
-    {
-        Admin,
-        User,
-
-    }
     public class User
     {
         public int Id { get; set; }
@@ -19,9 +12,7 @@ namespace WatchLibrary
 
         public string? Email { get; set; }
 
-        public string? Password { get; set; }  
-
-        public UserRole Role { get; set; } = UserRole.User; // Standard rolle
+        public string? Password { get; set; }
 
 
 
@@ -48,24 +39,37 @@ namespace WatchLibrary
 
 
         }
-        public void ValidatePasswordToUpper()
+        public void ValidatePasswordToUpper(string password)
         {
-            if (string.IsNullOrEmpty(Password))
-                throw new ArgumentNullException(nameof(Password), "Password cannot be null or empty");
-
-            if (!Regex.IsMatch(Password, @"[A-Z]"))
+            // Regular expression to check if there's at least one uppercase letter
+            if (!Regex.IsMatch(password, @"[A-Z]"))
             {
-                throw new ArgumentException("Password must contain at least one uppercase letter.");
+                Console.WriteLine("Password must contain at least one uppercase letter.");
+            }
+            else
+            {
+                Console.WriteLine("Password is valid.");
             }
         }
 
+		public void ValidateUsername()
+		{
+			if (Username.Length > 10)
+			{
+				throw new ArgumentOutOfRangeException("Please insert a valid Username");
+			}
+		}
 
 
-        public void Validate()
+
+		public void Validate()
         {
             ValidateUserName();
             ValidatePasswordLength();
             ValidatePasswordToUpper();
+
+
+
 
         }
 
