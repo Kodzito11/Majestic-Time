@@ -6,23 +6,30 @@ namespace WatchLibrary.Models
 {
 	public class User
 	{
-		public int Id { get; set; }
+
+        public enum UserRole
+        {
+            Admin,
+            User,
+        }
+        public int Id { get; set; }
 
 		public string? Username { get; set; }
 
 		public string? Email { get; set; }
 
 		public string? Password { get; set; }
+        public UserRole Role { get; set; } = UserRole.User;
 
 
 
-		public void ValidateUserName()
+        private void ValidateUserName()
 		{
 			if (string.IsNullOrWhiteSpace(Username))
 				throw new ArgumentNullException(nameof(Username), "Please insert a valid Username");
 		}
 
-		public void ValidatePasswordLength()
+		private void ValidatePasswordLength()
 		{
 
 			if (string.IsNullOrWhiteSpace(Password))
@@ -39,7 +46,7 @@ namespace WatchLibrary.Models
 
 
 		}
-		public void ValidatePasswordToUpper(string password)
+		private void ValidatePasswordToUpper(string password)
 		{
 			// Regular expression to check if there's at least one uppercase letter
 			if (!Regex.IsMatch(password, @"[A-Z]"))
@@ -52,7 +59,7 @@ namespace WatchLibrary.Models
 			}
 		}
 
-		public void ValidateUsername()
+		private void ValidateUsername()
 		{
 			if (Username.Length > 10)
 			{
@@ -66,10 +73,7 @@ namespace WatchLibrary.Models
 		{
 			ValidateUserName();
 			ValidatePasswordLength();
-			ValidatePasswordToUpper();
-
-
-
+			//ValidatePasswordToUpper();
 
 		}
 
