@@ -6,17 +6,17 @@ using WatchLibrary;
 
 namespace WatchLibrary
 {
-    public class WatchLibrary
+    public class UserRepository
     {
         private int _nextId = 1; // Holder styr på næste unikke ID
         private readonly List<User> _users = new(); // Liste over brugere
 
-        public WatchLibrary()
+        public UserRepository()
         {
             // Tilføjer nogle startbrugere ved oprettelse af repository
             _users.Add(new User { Id = _nextId++, Username = "Roman", Email = "roman@example.com", Password = "hashedpassword1" });
-            _users.Add(new User { Id = _nextId++, Username = "Hans", Email = "hans@example.com", Password = "hashedpassword2" });
-            _users.Add(new User { Id = _nextId++, Username = "Mette", Email = "mette@example.com", Password = "hashedpassword3" });
+            _users.Add(new User { Id = _nextId++, Username = "Kodo", Email = "kodo@example.com", Password = "hashedpassword2" });
+            _users.Add(new User { Id = _nextId++, Username = "Joutiar", Email = "Joutiar@example.com", Password = "hashedpassword3" });
         }
 
         public List<User> GetAll()

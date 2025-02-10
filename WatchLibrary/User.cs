@@ -9,6 +9,7 @@ namespace WatchLibrary
     {
         Admin,
         User,
+
     }
     public class User
     {
@@ -18,7 +19,7 @@ namespace WatchLibrary
 
         public string? Email { get; set; }
 
-        public string? Password { get; set; }
+        public string? Password { get; set; }  
 
         public UserRole Role { get; set; } = UserRole.User; // Standard rolle
 
@@ -47,18 +48,17 @@ namespace WatchLibrary
 
 
         }
-        public void ValidatePasswordToUpper(string password)
+        public void ValidatePasswordToUpper()
         {
-            // Regular expression to check if there's at least one uppercase letter
-            if (!Regex.IsMatch(password, @"[A-Z]"))
+            if (string.IsNullOrEmpty(Password))
+                throw new ArgumentNullException(nameof(Password), "Password cannot be null or empty");
+
+            if (!Regex.IsMatch(Password, @"[A-Z]"))
             {
-                Console.WriteLine("Password must contain at least one uppercase letter.");
-            }
-            else
-            {
-                Console.WriteLine("Password is valid.");
+                throw new ArgumentException("Password must contain at least one uppercase letter.");
             }
         }
+
 
 
         public void Validate()
