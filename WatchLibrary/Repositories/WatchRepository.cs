@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-namespace WatchLibrary
-	{
+using WatchLibrary.Models;
+namespace WatchLibrary.Repositories
+{
 	public class WatchRepository
 	{
 		private int _nextId = 1; // Holder styr på næste unikke ID
@@ -68,4 +69,4 @@ namespace WatchLibrary
 			return existingWatch;
 		}
 	}
-	}
+}
