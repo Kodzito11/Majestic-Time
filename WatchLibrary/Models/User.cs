@@ -66,7 +66,7 @@ namespace WatchLibrary.Models
 		{
 			ValidateUserName();
 			ValidatePasswordLength();
-			ValidatePasswordToUpper();
+			//ValidatePasswordToUpper();
 
 
 
