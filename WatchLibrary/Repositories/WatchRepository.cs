@@ -66,7 +66,8 @@ namespace WatchLibrary.Repositories
 			existingWatch.Functions = watch.Functions;
 			existingWatch.Size = watch.Size;
 			existingWatch.Condition = watch.Condition;
-			return existingWatch;
+			existingWatch.Description = watch.Description;
+            return existingWatch;
 		}
 	}
 }
