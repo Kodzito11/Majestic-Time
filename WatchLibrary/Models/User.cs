@@ -24,12 +24,19 @@ namespace WatchLibrary.Models
 
 
         private void ValidateUserName()
-		{
-			if (string.IsNullOrWhiteSpace(Username))
-				throw new ArgumentNullException(nameof(Username), "Please insert a valid Username");
-		}
+        {
+            if (string.IsNullOrWhiteSpace(Username))
+                throw new ArgumentNullException(nameof(Username), "Username cannot be empty or whitespace");
 
-		private void ValidatePasswordLength()
+            if (Username.Length < 3 || Username.Length > 30)
+                throw new ArgumentOutOfRangeException(nameof(Username), "Username must be between 3 and 30 characters");
+
+            // Kun tillad bogstaver, tal, underscore (_) og bindestreg (-)
+            if (!Regex.IsMatch(Username, @"^[a-zA-Z0-9_-]+$"))
+                throw new ArgumentException("Username can only contain letters, numbers, underscores (_), and hyphens (-)");
+        }
+
+        private void ValidatePasswordLength()
 		{
 
 			if (string.IsNullOrWhiteSpace(Password))
@@ -59,15 +66,7 @@ namespace WatchLibrary.Models
 			}
 		}
 
-		private void ValidateUsername()
-		{
-			if (Username.Length > 10)
-			{
-				throw new ArgumentOutOfRangeException("Please insert a valid Username");
-			}
-		}
-
-
+	
 
 		public void Validate()
 		{
