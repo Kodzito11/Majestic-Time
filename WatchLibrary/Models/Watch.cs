@@ -18,6 +18,7 @@ namespace WatchLibrary
         public int Size { get; set; }
         public int Condition { get; set; }
         public string? Description { get; set; }
+        public decimal Price { get; set; }
 
         private void ValidateBrand()
         {

@@ -4,70 +4,170 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WatchLibrary.Models;
+using Microsoft.Data.SqlClient;
+using WatchLibrary.Database;
+
 namespace WatchLibrary.Repositories
 {
-	public class WatchRepository
-	{
-		private int _nextId = 1; // Holder styr på næste unikke ID
-		private readonly List<Watch> _watches = new(); // Liste over ure
+    public class WatchRepository
+    {
 
-		public WatchRepository()
-		{
-			// Tilføjer nogle starture ved oprettelse af repository
-			_watches.Add(new Watch { Id = _nextId++, Brand = "Rolex", Model = "Hulk", ReferenceNumber = "783289", Year = 1900, Accessories = "Med certifikat", Functions = "Special", Size = 40, Condition = 9 });
-			_watches.Add(new Watch { Id = _nextId++, Brand = "Hublot", Model = "Big Bang", ReferenceNumber = "783289", Year = 2000, Accessories = "Med certifikat", Functions = "Special", Size = 40, Condition = 9 });
-			_watches.Add(new Watch { Id = _nextId++, Brand = "Seiko", Model = "Prospex", ReferenceNumber = "783289", Year = 1900, Accessories = "Med certifikat", Functions = "Special", Size = 40, Condition = 9 });
-		}
+        private readonly DBConnection _dbConnection;
 
-		public List<Watch> GetAll()
-		{
-			// Returnerer en kopi af listen for at beskytte interne data
-			return new List<Watch>(_watches);
-		}
+        public WatchRepository(DBConnection dbConnection)
+        {
+            _dbConnection = dbConnection;
+        }
 
-		public Watch? GetById(int id)
-		{
-			// Finder et ur baseret på ID
-			return _watches.Find(watch => watch.Id == id);
-		}
 
-		public Watch Add(Watch watch)
-		{
-			// Validerer ur før tilføjelse
-			watch.Id = _nextId++; // Tildeler et unikt ID
-			_watches.Add(watch);
-			return watch;
-		}
 
-		public Watch? Remove(int id)
-		{
-			// Finder uret, der skal fjernes
-			Watch? watch = GetById(id);
-			if (watch == null)
-			{
-				return null; // Returnerer null, hvis uret ikke findes
-			}
-			_watches.Remove(watch);
-			return watch;
-		}
 
-		public Watch? Update(int id, Watch watch)
-		{
-			Watch? existingWatch = GetById(id);
-			if (existingWatch == null)
-			{
-				return null;
-			}
-			existingWatch.Brand = watch.Brand;
-			existingWatch.Model = watch.Model;
-			existingWatch.ReferenceNumber = watch.ReferenceNumber;
-			existingWatch.Year = watch.Year;
-			existingWatch.Accessories = watch.Accessories;
-			existingWatch.Functions = watch.Functions;
-			existingWatch.Size = watch.Size;
-			existingWatch.Condition = watch.Condition;
-			existingWatch.Description = watch.Description;
-            return existingWatch;
-		}
-	}
+        public List<Watch> GetAll()
+        {
+            var watches = new List<Watch>();
+            var conn = _dbConnection.GetConnection();
+            var cmd = new SqlCommand("SELECT Id, Brand, Model, ReferenceNumber, Year, Accessories, Functions, Size, Condition, Description, Price FROM Watches", conn);
+
+            try
+            {
+                conn.Open();
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    var watch = new Watch
+                    {
+                        Id = reader.GetInt32(0),
+                        Brand = reader.GetString(1),
+                        Model = reader.GetString(2),
+                        ReferenceNumber = reader.GetString(3),
+                        Year = reader.GetInt32(4),
+                        Accessories = reader.GetString(5),
+                        Functions = reader.GetString(6),
+                        Size = reader.GetInt32(7),
+                        Condition = reader.GetInt32(8),
+                        Description = reader.GetString(9),
+                        Price = reader.GetDecimal(10)
+                    };
+                    watches.Add(watch);
+                }
+            }
+            finally
+            {
+                conn.Close();
+            }
+
+            return watches;
+        }
+
+        public Watch GetById(int id)
+        {
+            var conn = _dbConnection.GetConnection();
+            var cmd = new SqlCommand("SELECT Id, Brand, Model, ReferenceNumber, Year, Accessories, Functions, Size, Condition, Description, Price FROM Watches WHERE Id = @Id", conn);
+            cmd.Parameters.AddWithValue("@Id", id);
+
+            try
+            {
+                conn.Open();
+                var reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    return new Watch
+                    {
+                        Id = reader.GetInt32(0),
+                        Brand = reader.GetString(1),
+                        Model = reader.GetString(2),
+                        ReferenceNumber = reader.GetString(3),
+                        Year = reader.GetInt32(4),
+                        Accessories = reader.GetString(5),
+                        Functions = reader.GetString(6),
+                        Size = reader.GetInt32(7),
+                        Condition = reader.GetInt32(8),
+                        Description = reader.GetString(9),
+                        Price = reader.GetDecimal(10)
+                    };
+                }
+            }
+            finally
+            {
+                conn.Close();
+            }
+
+            return null;
+        }
+
+        public void Add(Watch watch)
+        {
+            var conn = _dbConnection.GetConnection();
+            var cmd = new SqlCommand("INSERT INTO Watches (Brand, Model, ReferenceNumber, Year, Accessories, Functions, Size, Condition, Description, Price) VALUES (@Brand, @Model, @ReferenceNumber, @Year, @Accessories, @Functions, @Size, @Condition, @Description, @Price)", conn);
+
+            cmd.Parameters.AddWithValue("@Brand", watch.Brand);
+            cmd.Parameters.AddWithValue("@Model", watch.Model);
+            cmd.Parameters.AddWithValue("@ReferenceNumber", watch.ReferenceNumber);
+            cmd.Parameters.AddWithValue("@Year", watch.Year);
+            cmd.Parameters.AddWithValue("@Accessories", watch.Accessories);
+            cmd.Parameters.AddWithValue("@Functions", watch.Functions);
+            cmd.Parameters.AddWithValue("@Size", watch.Size);
+            cmd.Parameters.AddWithValue("@Condition", watch.Condition);
+            cmd.Parameters.AddWithValue("@Description", watch.Description);
+            cmd.Parameters.AddWithValue("@Price", watch.Price);
+
+            try
+            {
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        public void Update(Watch watch)
+        {
+            var conn = _dbConnection.GetConnection();
+            var cmd = new SqlCommand("UPDATE Watches SET Brand = @Brand, Model = @Model, ReferenceNumber = @ReferenceNumber, Year = @Year, Accessories = @Accessories, Functions = @Functions, Size = @Size, Condition = @Condition, Description = @Description, Price = @Price WHERE Id = @Id", conn);
+
+            cmd.Parameters.AddWithValue("@Id", watch.Id);
+            cmd.Parameters.AddWithValue("@Brand", watch.Brand);
+            cmd.Parameters.AddWithValue("@Model", watch.Model);
+            cmd.Parameters.AddWithValue("@ReferenceNumber", watch.ReferenceNumber);
+            cmd.Parameters.AddWithValue("@Year", watch.Year);
+            cmd.Parameters.AddWithValue("@Accessories", watch.Accessories);
+            cmd.Parameters.AddWithValue("@Functions", watch.Functions);
+            cmd.Parameters.AddWithValue("@Size", watch.Size);
+            cmd.Parameters.AddWithValue("@Condition", watch.Condition);
+            cmd.Parameters.AddWithValue("@Description", watch.Description);
+            cmd.Parameters.AddWithValue("@Price", watch.Price);
+
+            try
+            {
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        public void Delete(int id)
+        {
+            var conn = _dbConnection.GetConnection();
+            var cmd = new SqlCommand("DELETE FROM Watches WHERE Id = @Id", conn);
+            cmd.Parameters.AddWithValue("@Id", id);
+
+            try
+            {
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+    }
 }
+
