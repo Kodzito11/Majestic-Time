@@ -99,6 +99,7 @@ namespace WatchLibrary.Repositories
 
         public void Add(Watch watch)
         {
+            watch.Validate();
             var conn = _dbConnection.GetConnection();
             var cmd = new SqlCommand("INSERT INTO Watches (Brand, Model, ReferenceNumber, Year, Accessories, Functions, Size, Condition, Description, Price) VALUES (@Brand, @Model, @ReferenceNumber, @Year, @Accessories, @Functions, @Size, @Condition, @Description, @Price)", conn);
 
@@ -146,6 +147,7 @@ namespace WatchLibrary.Repositories
                 conn.Open();
                 cmd.ExecuteNonQuery();
             }
+
             finally
             {
                 conn.Close();
