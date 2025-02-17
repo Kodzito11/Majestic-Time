@@ -1,11 +1,12 @@
 ﻿using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
+using Isopoh.Cryptography.Argon2;
 
 namespace WatchLibrary.Models
 {
-	public class User
-	{
+    public class User
+    {
 
         public enum UserRole
         {
@@ -14,14 +15,35 @@ namespace WatchLibrary.Models
         }
         public int Id { get; set; }
 
-		public string? Username { get; set; }
+        public string? Username { get; set; }
 
-		public string? Email { get; set; }
+        public string? Email { get; set; }
 
-		public string? Password { get; set; }
+        public string? PasswordHash { get; set; }
         public UserRole Role { get; set; } = UserRole.User;
 
+        //  Hash og gem password ved oprettelse af bruger
+        public void SetPassword(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password cannot be null or empty");
 
+            ValidatePassword(password); // Kald valideringsmetode
+            PasswordHash = Argon2.Hash(password); // Hasher password med Argon2
+        }
+
+        // Verificér password ved login
+        public bool VerifyPassword(string password)
+        {
+            return PasswordHash != null && Isopoh.Cryptography.Argon2.Argon2.Verify(PasswordHash, password);
+        }
+
+        // Add the missing ValidatePassword method
+        private void ValidatePassword(string password)
+        {
+            ValidatePasswordLength(password);
+            ValidatePasswordToUpper(password);
+        }
 
         private void ValidateUserName()
         {
@@ -36,50 +58,46 @@ namespace WatchLibrary.Models
                 throw new ArgumentException("Username can only contain letters, numbers, underscores (_), and hyphens (-)");
         }
 
-        private void ValidatePasswordLength()
-		{
+        private void ValidatePasswordLength(string password)
+        {
 
-			if (string.IsNullOrWhiteSpace(Password))
-			{
-				throw new ArgumentException(nameof(Password), "Password cannot be null or empty");
-			}
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new ArgumentException(nameof(password), "Password cannot be null or empty");
+            }
 
-			if (Password.Length < 12 && Password.Length > 64)
-			{
+            if (password.Length < 12 || password.Length > 64)
+            {
 
-				throw new ArgumentOutOfRangeException("Password must contain at least 12 characters and cannot exceed 64 characters");
+                throw new ArgumentOutOfRangeException("Password must contain at least 12 characters and cannot exceed 64 characters");
 
-			}
+            }
 
 
-		}
-		private void ValidatePasswordToUpper(string password)
-		{
-			// Regular expression to check if there's at least one uppercase letter
-			if (!Regex.IsMatch(password, @"[A-Z]"))
-			{
-				Console.WriteLine("Password must contain at least one uppercase letter.");
-			}
-			else
-			{
-				Console.WriteLine("Password is valid.");
-			}
-		}
+        }
+        private void ValidatePasswordToUpper(string password)
+        {
+            // Regular expression to check if there's at least one uppercase letter
+            if (!Regex.IsMatch(password, @"[A-Z]"))
+            {
+                throw new ArgumentException("Password must contain at least one uppercase letter.");
+            }
+        }
 
-	
 
-		public void Validate()
-		{
-			ValidateUserName();
-			ValidatePasswordLength();
-			//ValidatePasswordToUpper();
 
-		}
+        public void Validate()
+        {
+            ValidateUserName();
+            ValidatePasswordLength(PasswordHash);
+            //ValidatePasswordToUpper();
 
-		public virtual string ToString()  //virtual - hvis underliggende klasser skal overskrives med egen tostring
-		{
-			return $"Id: {Id}, UserName {Username}, Email: {Email}";
-		}
+        }
 
-	}
+        public virtual string ToString()  //virtual - hvis underliggende klasser skal overskrives med egen tostring
+        {
+            return $"Id: {Id}, UserName {Username}, Email: {Email}";
+        }
+
+    }
 }

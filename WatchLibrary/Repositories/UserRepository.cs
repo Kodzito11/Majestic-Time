@@ -37,7 +37,7 @@ namespace WatchLibrary.Repositories
                     {
                         Id = reader.GetInt32(0),
                         Email = reader.GetString(1),
-                        Password = reader.GetString(2)
+                        PasswordHash = reader.GetString(2)
                     };
                     users.Add(user);
                 }
@@ -76,7 +76,7 @@ namespace WatchLibrary.Repositories
                     {
                         Id = reader.GetInt32(0),
                         Email = reader.GetString(1),
-                        Password = reader.GetString(2)
+                        PasswordHash = reader.GetString(2)
                     };
                     reader.Close();
                     return user;
@@ -109,7 +109,7 @@ namespace WatchLibrary.Repositories
 
 
             cmd.Parameters.AddWithValue("@mail", user.Email);
-            cmd.Parameters.AddWithValue("@password", user.Password);
+            cmd.Parameters.AddWithValue("@password", user.PasswordHash);
             cmd.Parameters.AddWithValue("@role", user.Role.ToString()); // Rolle er enum, så vi gemmer det som en streng
 
             try
@@ -168,7 +168,7 @@ namespace WatchLibrary.Repositories
 
             cmd.Parameters.AddWithValue("@username", user.Username);
             cmd.Parameters.AddWithValue("@mail", user.Email);
-            cmd.Parameters.AddWithValue("@password", user.Password);
+            cmd.Parameters.AddWithValue("@password", user.PasswordHash);
             cmd.Parameters.AddWithValue("@role", user.Role.ToString());
             cmd.Parameters.AddWithValue("@Id", user.Id);
 
