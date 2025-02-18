@@ -39,9 +39,21 @@ namespace WatchLibrary.Models
                 throw new ArgumentException("Username can only contain letters, numbers, underscores (_), and hyphens (-)");
         }
 
+        private void ValidateEmail()// Validate email
+        {
+            if (string.IsNullOrWhiteSpace(Email))
+                throw new ArgumentNullException(nameof(Email), "Email cannot be empty");
+
+            var emailRegex = new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");//Regex for email validation
+            if (!emailRegex.IsMatch(Email))
+                throw new ArgumentException("Invalid email format");
+        }
+
+
         public void Validate()
         {
             ValidateUserName();
+            ValidateEmail();
 
         }
 

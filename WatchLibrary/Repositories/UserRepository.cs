@@ -51,6 +51,32 @@ namespace WatchLibrary.Repositories
                 if (conn.State == ConnectionState.Open) conn.Close();
             }
         }
+         //public bool EmailExists(string email)
+         //{
+         //      var conn = _dbConnection.GetConnection();
+         //      var cmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Email = @Email", conn);
+         //      cmd.Parameters.AddWithValue("@Email", email);
+
+         //      try
+         //      {
+         //        conn.Open();
+         //        int count = (int)cmd.ExecuteScalar();
+         //        return count > 0;
+         //      }
+         //   catch (Exception ex)
+         //      {
+
+         //       throw new Exception("Email Eksitrere", ex);
+
+         //      }
+
+         //   finally
+         //      {
+
+         //       conn.Close();
+
+         //      }
+         //}
 
         public User GetById(int id)
         {
@@ -86,11 +112,17 @@ namespace WatchLibrary.Repositories
             }
         }
 
+
         public User Add(User user)
         {
+
             user.SetPassword(user.Password); // Hasher password
             user.Validate(); // Validerer brugeren
 
+            //if (EmailExists(user.Email))
+            //{
+            //    throw new Exception("E-mailen er allerede i brug.");
+            //}
             var conn = _dbConnection.GetConnection();
             var cmd = new SqlCommand("INSERT INTO Users (username, Email, Password, UserRole) VALUES (@username, @mail, @password, @role); SELECT SCOPE_IDENTITY()", conn);
             cmd.Parameters.AddWithValue("@username", user.Username);
