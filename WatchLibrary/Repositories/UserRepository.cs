@@ -1,11 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Xml.Linq;
 using WatchLibrary.Database;
 using WatchLibrary.Models;
 
@@ -13,7 +12,6 @@ namespace WatchLibrary.Repositories
 {
     public class UserRepository
     {
-
         private readonly DBConnection _dbConnection;
 
         public UserRepository(DBConnection dbconnection)
@@ -29,9 +27,9 @@ namespace WatchLibrary.Repositories
 
             try
             {
-                conn.Open(); //Starter forbindelsen, så vi kan snakke med databasen.
-                var reader = cmd.ExecuteReader(); //Udfører SQL'en og giver os adgang til de data, vi har bedt om.
-                while (reader.Read()) //gennemgår hver række
+                conn.Open();
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
                 {
                     var user = new User
                     {
@@ -50,15 +48,9 @@ namespace WatchLibrary.Repositories
             }
             finally
             {
-                if (conn.State == ConnectionState.Open)
-                {
-                    conn.Close();
-                }
+                if (conn.State == ConnectionState.Open) conn.Close();
             }
         }
-
-
-
 
         public User GetById(int id)
         {
@@ -90,34 +82,28 @@ namespace WatchLibrary.Repositories
             }
             finally
             {
-                if (conn.State == ConnectionState.Open)
-                {
-                    conn.Close();
-                }
+                if (conn.State == ConnectionState.Open) conn.Close();
             }
         }
 
-
         public User Add(User user)
         {
+            user.SetPassword(user.Password); // Hasher password
+            user.Validate(); // Validerer brugeren
 
-
-            user.Validate();
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("Insert into Users (username, mail, password, role) values (@username, @mail, @password, @role); SELECT SCOPE_IDENTITY()", conn);
+            var cmd = new SqlCommand("INSERT INTO Users (username, mail, password, role) VALUES (@username, @mail, @password, @role); SELECT SCOPE_IDENTITY()", conn);
             cmd.Parameters.AddWithValue("@username", user.Username);
-
-
             cmd.Parameters.AddWithValue("@mail", user.Email);
             cmd.Parameters.AddWithValue("@password", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@role", user.Role.ToString()); // Rolle er enum, så vi gemmer det som en streng
+            cmd.Parameters.AddWithValue("@role", user.Role.ToString());
 
             try
             {
-                conn.Open();  // Åbner forbindelsen
-                var newId = Convert.ToInt32(cmd.ExecuteScalar());  // Kører kommandoen og får ID'et tilbage
-                user.Id = newId;  // Sætter det nye ID på brugerobjektet
-                return user;  // Returnerer den tilføjede bruger
+                conn.Open();
+                var newId = Convert.ToInt32(cmd.ExecuteScalar());
+                user.Id = newId;
+                return user;
             }
             catch (Exception ex)
             {
@@ -125,7 +111,7 @@ namespace WatchLibrary.Repositories
             }
             finally
             {
-                conn.Close();
+                if (conn.State == ConnectionState.Open) conn.Close();
             }
         }
 
