@@ -92,7 +92,7 @@ namespace WatchLibrary.Repositories
             user.Validate(); // Validerer brugeren
 
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("INSERT INTO Users (username, mail, password, role) VALUES (@username, @mail, @password, @role); SELECT SCOPE_IDENTITY()", conn);
+            var cmd = new SqlCommand("INSERT INTO Users (username, Email, Password, UserRole) VALUES (@username, @mail, @password, @role); SELECT SCOPE_IDENTITY()", conn);
             cmd.Parameters.AddWithValue("@username", user.Username);
             cmd.Parameters.AddWithValue("@mail", user.Email);
             cmd.Parameters.AddWithValue("@password", user.PasswordHash);

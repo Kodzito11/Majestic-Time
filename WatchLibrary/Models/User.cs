@@ -8,8 +8,8 @@ namespace WatchLibrary.Models
     {
         public enum UserRole
         {
-            Admin,
             User,
+            Admin,
         }
 
 
@@ -24,11 +24,7 @@ namespace WatchLibrary.Models
         public string? Password { get; set; } // Tilføjet for at håndtere rå password
 
 
-        public void Validate()
-        {
-            ValidateUserName();
-          
-        }
+     
 
         
         private void ValidateUserName()
@@ -41,6 +37,12 @@ namespace WatchLibrary.Models
 
             if (!Regex.IsMatch(Username, @"^[a-zA-Z0-9_-]+$"))
                 throw new ArgumentException("Username can only contain letters, numbers, underscores (_), and hyphens (-)");
+        }
+
+        public void Validate()
+        {
+            ValidateUserName();
+
         }
 
         // Validate password
