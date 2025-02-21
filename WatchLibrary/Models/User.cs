@@ -9,7 +9,7 @@ namespace WatchLibrary.Models
         public enum UserRole
         {
             User,
-            Admin,
+            Admin
         }
 
 
@@ -54,14 +54,22 @@ namespace WatchLibrary.Models
         {
             ValidateUserName();
             ValidateEmail();
-
+            if (Password != null)
+            {
+                ValidateSetPassword(Password);
+            }
+            else
+            {
+                throw new ArgumentNullException(nameof(Password), "Password cannot be null");
+            }
         }
 
         // Validate password
         public void ValidatePassword(string password)
         {
             ValidatePasswordLength(password);
-            ValidatePasswordUppercase(password);
+            ValidatePasswordComplexity(password);
+
         }
 
         // Validate password length
@@ -74,15 +82,20 @@ namespace WatchLibrary.Models
                 throw new ArgumentOutOfRangeException(nameof(password), "Password must contain at least 12 characters and cannot exceed 64 characters");
         }
 
-        // Validate password uppercase
-        private void ValidatePasswordUppercase(string password)
+        //Validere Uppercase, Lowercase, Digit, Special Character
+        private void ValidatePasswordComplexity(string password)
         {
-            if (!Regex.IsMatch(password, @"[A-Z]"))
-                throw new ArgumentException("Password must contain at least one uppercase letter.", nameof(password));
+            if (!Regex.IsMatch(password, @"[A-Z]") || !Regex.IsMatch(password, @"[a-z]"))
+                throw new ArgumentException("Password must contain at least one uppercase and one lowercase letter.", nameof(password));
+            if (!Regex.IsMatch(password, @"\d"))
+                throw new ArgumentException("Password must contain at least one digit.", nameof(password));
+            if (!Regex.IsMatch(password, @"[\W_]"))
+                throw new ArgumentException("Password must contain at least one special character.", nameof(password));
         }
 
-        // Set and hash password
-        public void SetPassword(string password)
+
+           // Set and hash password
+        public void ValidateSetPassword(string password)
         {
             ValidatePassword(password); // Validate the raw password
             PasswordHash = Argon2.Hash(password); // Hash the password

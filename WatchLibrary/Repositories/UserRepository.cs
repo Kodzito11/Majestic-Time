@@ -1,7 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -115,8 +114,13 @@ namespace WatchLibrary.Repositories
 
         public User Add(User user)
         {
+            // Hvis Password er null eller tom, kast en undtagelse
+            if (string.IsNullOrWhiteSpace(user.Password))
+            {
+                throw new ArgumentException("Password cannot be null or empty.", nameof(user.Password));
+            }
 
-            user.SetPassword(user.Password); // Hasher password
+            user.ValidateSetPassword(user.Password); // Hasher password
             user.Validate(); // Validerer brugeren
 
             //if (EmailExists(user.Email))
@@ -129,7 +133,7 @@ namespace WatchLibrary.Repositories
             cmd.Parameters.AddWithValue("@mail", user.Email);
             cmd.Parameters.AddWithValue("@password", user.PasswordHash);
             cmd.Parameters.AddWithValue("@role", user.Role.ToString());
-
+          
             try
             {
                 conn.Open();
