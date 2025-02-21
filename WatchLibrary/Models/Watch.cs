@@ -13,10 +13,8 @@ namespace WatchLibrary
         public string? Model { get; set; }
         public string? ReferenceNumber { get; set; }
         public int Year { get; set; }
-        public string? Accessories { get; set; } //Alle ure kommer ikke nøvendigvis med tilbehør
         public string? Functions { get; set; } //Alle ure har ikke nødvendigvis ekstra funktioner
         public int Size { get; set; }
-        public int Condition { get; set; }
         public string? Description { get; set; }
         public decimal Price { get; set; }
 
@@ -52,14 +50,6 @@ namespace WatchLibrary
             }
         }
 
-        private void ValidateAccessories()
-        {
-            if (string.IsNullOrWhiteSpace(Accessories))
-            {
-                throw new ArgumentNullException(nameof(Accessories), "Please insert a valid Accessories");
-            }
-        }
-
         private void ValidateFunctions()
         {
             if (string.IsNullOrWhiteSpace(Functions))
@@ -74,7 +64,6 @@ namespace WatchLibrary
             ValidateModel();
             ValidateReferenceNumber();
             ValidateYear();
-            ValidateAccessories();
             ValidateFunctions();
         }
 
@@ -82,7 +71,7 @@ namespace WatchLibrary
 
         public override string ToString()
         {
-            return $"Id: {Id}, Brand: {Brand}, Model: {Model}, ReferenceNumber: {ReferenceNumber}, Year: {Year}, Accessories: {Accessories}, Functions: {Functions}, Size: {Size}, Condition: {Condition}";
+            return $"Id: {Id}, Brand: {Brand}, Model: {Model}, ReferenceNumber: {ReferenceNumber}, Year: {Year}, Functions: {Functions}, Size: {Size}";
         }
     }
 
