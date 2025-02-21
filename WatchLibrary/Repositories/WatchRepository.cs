@@ -26,7 +26,7 @@ namespace WatchLibrary.Repositories
         {
             var watches = new List<Watch>();
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("SELECT Id, Brand, Model, ReferenceNumber, Year, Accessories, Functions, Size, Condition, Description, Price FROM Watches", conn);
+            var cmd = new SqlCommand("SELECT Id, Brand, Model, ReferenceNumber, Year, Functions, Size, Description, Price FROM Watches", conn);
 
             try
             {
@@ -42,12 +42,10 @@ namespace WatchLibrary.Repositories
                         Model = reader.GetString(2),
                         ReferenceNumber = reader.GetString(3),
                         Year = reader.GetInt32(4),
-                        Accessories = reader.GetString(5),
-                        Functions = reader.GetString(6),
-                        Size = reader.GetInt32(7),
-                        Condition = reader.GetInt32(8),
-                        Description = reader.GetString(9),
-                        Price = reader.GetDecimal(10)
+                        Functions = reader.GetString(5),
+                        Size = reader.GetInt32(6),
+                        Description = reader.GetString(7),
+                        Price = reader.GetDecimal(8)
                     };
                     watches.Add(watch);
                 }
@@ -63,7 +61,7 @@ namespace WatchLibrary.Repositories
         public Watch GetById(int id)
         {
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("SELECT Id, Brand, Model, ReferenceNumber, Year, Accessories, Functions, Size, Condition, Description, Price FROM Watches WHERE Id = @Id", conn);
+            var cmd = new SqlCommand("SELECT Id, Brand, Model, ReferenceNumber, Year, Functions, Size, Description, Price FROM Watches WHERE Id = @Id", conn);
             cmd.Parameters.AddWithValue("@Id", id);
 
             try
@@ -80,12 +78,10 @@ namespace WatchLibrary.Repositories
                         Model = reader.GetString(2),
                         ReferenceNumber = reader.GetString(3),
                         Year = reader.GetInt32(4),
-                        Accessories = reader.GetString(5),
-                        Functions = reader.GetString(6),
-                        Size = reader.GetInt32(7),
-                        Condition = reader.GetInt32(8),
-                        Description = reader.GetString(9),
-                        Price = reader.GetDecimal(10)
+                        Functions = reader.GetString(5),
+                        Size = reader.GetInt32(6),
+                        Description = reader.GetString(7),
+                        Price = reader.GetDecimal(8)
                     };
                 }
             }
@@ -107,10 +103,8 @@ namespace WatchLibrary.Repositories
             cmd.Parameters.AddWithValue("@Model", watch.Model);
             cmd.Parameters.AddWithValue("@ReferenceNumber", watch.ReferenceNumber);
             cmd.Parameters.AddWithValue("@Year", watch.Year);
-            cmd.Parameters.AddWithValue("@Accessories", watch.Accessories);
             cmd.Parameters.AddWithValue("@Functions", watch.Functions);
             cmd.Parameters.AddWithValue("@Size", watch.Size);
-            cmd.Parameters.AddWithValue("@Condition", watch.Condition);
             cmd.Parameters.AddWithValue("@Description", watch.Description);
             cmd.Parameters.AddWithValue("@Price", watch.Price);
 
@@ -128,17 +122,16 @@ namespace WatchLibrary.Repositories
         public void Update(Watch watch)
         {
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("UPDATE Watches SET Brand = @Brand, Model = @Model, ReferenceNumber = @ReferenceNumber, Year = @Year, Accessories = @Accessories, Functions = @Functions, Size = @Size, Condition = @Condition, Description = @Description, Price = @Price WHERE Id = @Id", conn);
+            var cmd = new SqlCommand("UPDATE Watches SET Brand = @Brand, Model = @Model, ReferenceNumber = @ReferenceNumber, Year = @Year, Functions = @Functions, Size = @Size, Description = @Description, Price = @Price WHERE Id = @Id", conn);
+
 
             cmd.Parameters.AddWithValue("@Id", watch.Id);
             cmd.Parameters.AddWithValue("@Brand", watch.Brand);
             cmd.Parameters.AddWithValue("@Model", watch.Model);
             cmd.Parameters.AddWithValue("@ReferenceNumber", watch.ReferenceNumber);
             cmd.Parameters.AddWithValue("@Year", watch.Year);
-            cmd.Parameters.AddWithValue("@Accessories", watch.Accessories);
             cmd.Parameters.AddWithValue("@Functions", watch.Functions);
             cmd.Parameters.AddWithValue("@Size", watch.Size);
-            cmd.Parameters.AddWithValue("@Condition", watch.Condition);
             cmd.Parameters.AddWithValue("@Description", watch.Description);
             cmd.Parameters.AddWithValue("@Price", watch.Price);
 
