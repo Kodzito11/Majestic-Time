@@ -36,8 +36,9 @@ namespace WatchLibrary.Repositories
                         Id = reader.GetInt32(0),
                         Username = reader.GetString(1),
                         Email = reader.GetString(2),
+                        Password = reader.GetString(3),
                         Role = (UserRole)Enum.Parse(typeof(UserRole), reader.GetString(4)),
-                        Password = reader.GetString(4)
+
                     };
                     users.Add(user);
                 }
