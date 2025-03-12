@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using WatchLibrary.Database;
 using WatchLibrary.Models;
+using static WatchLibrary.Models.User;
 
 namespace WatchLibrary.Repositories
 {
@@ -22,7 +23,7 @@ namespace WatchLibrary.Repositories
         {
             var users = new List<User>();
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("SELECT Id, Mail, Password FROM Users", conn);
+            var cmd = new SqlCommand("SELECT Id, Username, Email, Password, UserRole FROM Users", conn);
 
             try
             {
@@ -33,8 +34,11 @@ namespace WatchLibrary.Repositories
                     var user = new User
                     {
                         Id = reader.GetInt32(0),
-                        Email = reader.GetString(1),
-                        PasswordHash = reader.GetString(2)
+                        Username = reader.GetString(1),
+                        Email = reader.GetString(2),
+                        Password = reader.GetString(3),
+                        Role = (UserRole)Enum.Parse(typeof(UserRole), reader.GetString(4)),
+
                     };
                     users.Add(user);
                 }
@@ -80,7 +84,7 @@ namespace WatchLibrary.Repositories
         public User GetById(int id)
         {
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("SELECT Id, Mail, Password FROM Users WHERE Id = @Id", conn);
+            var cmd = new SqlCommand("SELECT Id, username, Email, Password, UserRole FROM Users WHERE Id = @Id", conn);
             cmd.Parameters.AddWithValue("@Id", id);
 
             try
@@ -92,8 +96,11 @@ namespace WatchLibrary.Repositories
                     var user = new User
                     {
                         Id = reader.GetInt32(0),
-                        Email = reader.GetString(1),
-                        PasswordHash = reader.GetString(2)
+                        Username = reader.GetString(1),
+                        Email = reader.GetString(2),
+                        Password = reader.GetString(3),
+                        Role = (UserRole)Enum.Parse(typeof(UserRole), reader.GetString(4)),
+
                     };
                     reader.Close();
                     return user;
