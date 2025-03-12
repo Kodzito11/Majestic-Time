@@ -9,7 +9,8 @@ namespace WatchLibrary.Models
         public enum UserRole
         {
             User,
-            Admin
+            Admin,
+            Guest
         }
 
 
