@@ -6,6 +6,7 @@ namespace WatchLibrary.Models
 {
     public class User
     {
+
         public enum UserRole
         {
             User,
@@ -17,11 +18,14 @@ namespace WatchLibrary.Models
         public int Id { get; set; }
         public string? Username { get; set; }
         public string? Email { get; set; }
-       
+
+        public int FailedAttempts { get; set; } = 0; // Hvor mange gange brugeren har tastet forkert
+        public DateTime? LockoutEnd { get; set; } = null; // Hvornår kontoen låses op
+
         [JsonIgnore]
         public string? PasswordHash { get; set; }
         public UserRole Role { get; set; } = UserRole.User;
-
+        
         public string? Password { get; set; } // Tilføjet for at håndtere rå password
 
 
@@ -100,6 +104,10 @@ namespace WatchLibrary.Models
         {
             ValidatePassword(password); // Validate the raw password
             PasswordHash = Argon2.Hash(password); // Hash the password
+
+            if (Password == null)
+                throw new ArgumentNullException(nameof(Password), "Password cannot be null");
+
         }
 
         // Verify password

@@ -7,6 +7,7 @@ using System.Data;
 using WatchLibrary.Database;
 using WatchLibrary.Models;
 using static WatchLibrary.Models.User;
+using System.ComponentModel.Design;
 
 namespace WatchLibrary.Repositories
 {
@@ -54,32 +55,70 @@ namespace WatchLibrary.Repositories
                 if (conn.State == ConnectionState.Open) conn.Close();
             }
         }
-         //public bool EmailExists(string email)
-         //{
-         //      var conn = _dbConnection.GetConnection();
-         //      var cmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Email = @Email", conn);
-         //      cmd.Parameters.AddWithValue("@Email", email);
+        //public bool EmailExists(string email)
+        //{
+        //      var conn = _dbConnection.GetConnection();
+        //      var cmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Email = @Email", conn);
+        //      cmd.Parameters.AddWithValue("@Email", email);
 
-         //      try
-         //      {
-         //        conn.Open();
-         //        int count = (int)cmd.ExecuteScalar();
-         //        return count > 0;
-         //      }
-         //   catch (Exception ex)
-         //      {
+        //      try
+        //      {
+        //        conn.Open();
+        //        int count = (int)cmd.ExecuteScalar();
+        //        return count > 0;
+        //      }
+        //   catch (Exception ex)
+        //      {
 
-         //       throw new Exception("Email Eksitrere", ex);
+        //       throw new Exception("Email Eksitrere", ex);
 
-         //      }
+        //      }
 
-         //   finally
-         //      {
+        //   finally
+        //      {
 
-         //       conn.Close();
+        //       conn.Close();
 
-         //      }
-         //}
+        //      }
+        //}
+        public User? GetByEmail(string email)
+        {
+            var conn = _dbConnection.GetConnection();
+            var cmd = new SqlCommand("SELECT Id, Username, Email, PasswordHash, UserRole, FailedAttempts, LockoutEnd FROM Users WHERE Email = @Email", conn);
+            cmd.Parameters.AddWithValue("@Email", email);
+
+            try
+            {
+                conn.Open();
+                var reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    var user = new User
+                    {
+                        Id = reader.GetInt32(0),
+                        Username = reader.GetString(1),
+                        Email = reader.GetString(2),
+                        PasswordHash = reader.GetString(3),
+                        Role = (UserRole)Enum.Parse(typeof(UserRole), reader.GetString(4)),
+                        FailedAttempts = reader.GetInt32(5),
+                        LockoutEnd = reader.IsDBNull(6) ? null : reader.GetDateTime(6)
+                    };
+                    reader.Close();
+                    return user;
+                }
+                reader.Close();
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Fejl ved hentning af bruger", ex);
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open) conn.Close();
+            }
+        }
+
 
         public User GetById(int id)
         {
@@ -140,7 +179,7 @@ namespace WatchLibrary.Repositories
             cmd.Parameters.AddWithValue("@mail", user.Email);
             cmd.Parameters.AddWithValue("@password", user.PasswordHash);
             cmd.Parameters.AddWithValue("@role", user.Role.ToString());
-          
+
             try
             {
                 conn.Open();
@@ -193,12 +232,14 @@ namespace WatchLibrary.Repositories
             user.Validate();  // Validerer brugerdata
 
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("UPDATE Users SET username = @username, mail = @mail, password = @password, role = @role WHERE Id = @Id", conn);
+            var cmd = new SqlCommand("UPDATE Users SET username = @username, mail = @mail, password = @password, role = @role, FailedAttempts = @FailedAttempts, LockoutEnd = @LockoutEnd WHERE Id = @Id", conn);
 
             cmd.Parameters.AddWithValue("@username", user.Username);
             cmd.Parameters.AddWithValue("@mail", user.Email);
             cmd.Parameters.AddWithValue("@password", user.PasswordHash);
             cmd.Parameters.AddWithValue("@role", user.Role.ToString());
+            cmd.Parameters.AddWithValue("@FailedAttempts", user.FailedAttempts);
+            cmd.Parameters.AddWithValue("@LockoutEnd", (object)user.LockoutEnd ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@Id", user.Id);
 
             try
