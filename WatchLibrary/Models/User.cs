@@ -24,6 +24,9 @@ namespace WatchLibrary.Models
 
         [JsonIgnore]
         public string? PasswordHash { get; set; }
+
+        [JsonIgnore]
+
         public UserRole Role { get; set; } = UserRole.User;
         
         public string? Password { get; set; } // Tilføjet for at håndtere rå password
@@ -59,15 +62,15 @@ namespace WatchLibrary.Models
         {
             ValidateUserName();
             ValidateEmail();
-            if (Password != null)
+
+            if (string.IsNullOrEmpty(Password))
             {
-                ValidateSetPassword(Password);
+                throw new ArgumentException("Password cannot be null or empty", nameof(Password));
             }
-            else
-            {
-                throw new ArgumentNullException(nameof(Password), "Password cannot be null");
-            }
+
+            ValidateSetPassword(Password);
         }
+
 
         // Validate password
         public void ValidatePassword(string password)
@@ -105,8 +108,8 @@ namespace WatchLibrary.Models
             ValidatePassword(password); // Validate the raw password
             PasswordHash = Argon2.Hash(password); // Hash the password
 
-            if (Password == null)
-                throw new ArgumentNullException(nameof(Password), "Password cannot be null");
+            if (PasswordHash == null)
+                throw new ArgumentNullException(nameof(PasswordHash), "Password cannot be null");
 
         }
 

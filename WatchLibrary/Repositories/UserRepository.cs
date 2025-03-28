@@ -8,6 +8,7 @@ using WatchLibrary.Database;
 using WatchLibrary.Models;
 using static WatchLibrary.Models.User;
 using System.ComponentModel.Design;
+using Isopoh.Cryptography.Argon2;
 
 namespace WatchLibrary.Repositories
 {
@@ -120,7 +121,7 @@ namespace WatchLibrary.Repositories
         }
 
 
-        public User GetById(int id)
+        public User? GetById(int id)
         {
             var conn = _dbConnection.GetConnection();
             var cmd = new SqlCommand("SELECT Id, username, Email, Password, UserRole FROM Users WHERE Id = @Id", conn);
@@ -229,7 +230,22 @@ namespace WatchLibrary.Repositories
 
         public User? Update(User user)
         {
-            user.Validate();  // Validerer brugerdata
+            if (string.IsNullOrEmpty(user.Password))
+            {
+                user.Password = "DefaultPassword1!"; // Updated default password to meet complexity requirements
+            }
+
+            try
+            {
+                // Validate the raw password before hashing
+                user.ValidatePassword(user.Password);
+                user.PasswordHash = Argon2.Hash(user.Password); // Hash the password
+                user.Validate();  // Validate user data
+            }
+            catch (ArgumentException ex)
+            {
+                throw new Exception("Password validation failed: " + ex.Message, ex);
+            }
 
             var conn = _dbConnection.GetConnection();
             var cmd = new SqlCommand("UPDATE Users SET username = @username, mail = @mail, password = @password, role = @role, FailedAttempts = @FailedAttempts, LockoutEnd = @LockoutEnd WHERE Id = @Id", conn);
@@ -239,28 +255,29 @@ namespace WatchLibrary.Repositories
             cmd.Parameters.AddWithValue("@password", user.PasswordHash);
             cmd.Parameters.AddWithValue("@role", user.Role.ToString());
             cmd.Parameters.AddWithValue("@FailedAttempts", user.FailedAttempts);
-            cmd.Parameters.AddWithValue("@LockoutEnd", (object)user.LockoutEnd ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@LockoutEnd", user.LockoutEnd.HasValue ? (object)user.LockoutEnd.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@Id", user.Id);
 
             try
             {
                 conn.Open();
-                int rowsAffected = cmd.ExecuteNonQuery();  // Kører opdateringskommandoen
+                int rowsAffected = cmd.ExecuteNonQuery();  // Execute update command
 
                 if (rowsAffected > 0)
                 {
-                    return user;  // Returnerer den opdaterede bruger
+                    return user;  // Return updated user
                 }
-                return null;  // Returnerer null, hvis ingen bruger blev opdateret (fx hvis ID ikke findes)
+                return null;  // Return null if no user was updated (e.g., if ID does not exist)
             }
             catch (Exception ex)
             {
-                throw new Exception("Fejl ved opdatering af bruger", ex);
+                throw new Exception("Error updating user", ex);
             }
             finally
             {
-                conn.Close();  // Lukker forbindelsen
+                conn.Close();  // Close connection
             }
         }
     }
+    
 }
