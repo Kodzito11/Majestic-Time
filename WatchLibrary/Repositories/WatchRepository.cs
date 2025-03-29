@@ -174,7 +174,36 @@ namespace WatchLibrary.Repositories
 				Price = w.Price
 			}).ToList();
 		}
+		public List<WatchDTO> Search(string query)
+		{
+			var watches = new List<WatchDTO>();
+			var conn = _dbConnection.GetConnection();
+			var cmd = new SqlCommand(
+				"SELECT Id, Brand, Model, Price FROM Watches WHERE Brand LIKE @q OR Model LIKE @q", conn);
+			cmd.Parameters.AddWithValue("@q", $"%{query}%");
 
+			try
+			{
+				conn.Open();
+				var reader = cmd.ExecuteReader();
+				while (reader.Read())
+				{
+					watches.Add(new WatchDTO
+					{
+						Id = reader.GetInt32(0),
+						Brand = reader.GetString(1),
+						Model = reader.GetString(2),
+						Price = reader.GetDecimal(3)
+					});
+				}
+			}
+			finally
+			{
+				conn.Close();
+			}
+
+			return watches;
+		}
 
 	}
 }
