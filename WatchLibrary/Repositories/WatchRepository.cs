@@ -163,6 +163,19 @@ namespace WatchLibrary.Repositories
                 conn.Close();
             }
         }
-    }
+
+		public List<WatchDTO> GetAllAsDTO()
+		{
+			return GetAll().Select(w => new WatchDTO
+			{
+				Id = w.Id,
+				Brand = w.Brand,
+				Model = w.Model,
+				Price = w.Price
+			}).ToList();
+		}
+
+
+	}
 }
 
