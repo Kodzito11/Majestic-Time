@@ -248,7 +248,7 @@ namespace WatchLibrary.Repositories
             }
 
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("UPDATE Users SET username = @username, mail = @mail, password = @password, role = @role, FailedAttempts = @FailedAttempts, LockoutEnd = @LockoutEnd WHERE Id = @Id", conn);
+            var cmd = new SqlCommand("UPDATE Users SET Username = @username, Email = @mail, PasswordHash = @password, UserRole = @role, FailedAttempts = @FailedAttempts, LockoutEnd = @LockoutEnd WHERE Id = @Id", conn);
 
             cmd.Parameters.AddWithValue("@username", user.Username);
             cmd.Parameters.AddWithValue("@mail", user.Email);
