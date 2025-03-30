@@ -1,6 +1,7 @@
 ﻿using Isopoh.Cryptography.Argon2;
 using WatchLibrary.Models;
 using WatchLibrary.Repositories;
+using System;
 
 public class AuthenticationService
 {
@@ -13,7 +14,7 @@ public class AuthenticationService
 
     public User? Authenticate(string email, string password, out string message)
     {
-        var user = _userRepository.GetByEmail(email); // Bruger direkte databasekald
+        var user = _userRepository.GetByEmail(email);
 
         if (user == null)
         {
@@ -21,15 +22,15 @@ public class AuthenticationService
             return null;
         }
 
-        // Tjek om kontoen er låst
+        // Check if the account is locked
         if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.UtcNow)
         {
             message = $"Account is locked. Try again at {user.LockoutEnd}";
             return null;
         }
 
-        // 🔑 Verificer adgangskoden med den hashed version
-        if (!Argon2.Verify(user.PasswordHash, password)) // Bruger PasswordHash i stedet for Password
+        // Verify the password with the hashed version
+        if (!Argon2.Verify(user.PasswordHash, password))
         {
             user.FailedAttempts++;
 
@@ -45,21 +46,20 @@ public class AuthenticationService
 
             try
             {
-                ValidatePasswordComplexity(password);
-                _userRepository.Update(user); // Opdaterer fejl i databasen
+                _userRepository.Update(user);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 // Log the exception for debugging purposes
-                Console.WriteLine($"Password validation failed: {ex.Message}");
-                message = "Password validation failed: " + ex.Message;
+                Console.WriteLine($"Error updating user: {ex.Message}");
+                message = "Error updating user: " + ex.Message;
                 return null;
             }
 
-            return null; // Returnerer null i stedet for false
+            return null;
         }
 
-        //  Login succes, nulstil mislykkede loginforsøg KUN hvis de var forskellige fra 0
+        // Reset failed login attempts if they were different from 0
         if (user.FailedAttempts > 0 || user.LockoutEnd != null)
         {
             user.FailedAttempts = 0;
@@ -68,45 +68,9 @@ public class AuthenticationService
         }
 
         message = "Login successful.";
-        return user; //  Returnerer User i stedet for bool
+        return user;
     }
 
-    // Metode til at ændre adgangskode
-    public bool ChangePassword(int userId, string oldPassword, string newPassword)
-    {
-        var user = _userRepository.GetById(userId); // Hent brugeren fra databasen
-
-        if (user == null)
-        {
-            throw new ArgumentException("User not found.");
-        }
-
-        // Verificer den gamle adgangskode
-        string message;
-        var authenticatedUser = Authenticate(user?.Email ?? throw new ArgumentNullException(nameof(user.Email)), oldPassword, out message);
-        if (authenticatedUser == null)
-        {
-            throw new ArgumentException("Old password is incorrect.");
-        }
-
-        // Valider den nye adgangskode
-        try
-        {
-            ValidatePasswordComplexity(newPassword); // Tjek om den nye adgangskode opfylder kravene
-        }
-        catch (ArgumentException ex)
-        {
-            throw new ArgumentException($"Password validation failed: {ex.Message}");
-        }
-
-        // Hash den nye adgangskode og opdater brugeren i databasen
-        user.PasswordHash = Argon2.Hash(newPassword);
-        _userRepository.Update(user); // Opdater brugerens adgangskode i databasen
-
-        return true; // Returner true, hvis ændringen er lykkedes
-    }
-
-    // Metode til at validere adgangskodekompleksitet
     public void ValidatePasswordComplexity(string password)
     {
         if (password.Length < 8)

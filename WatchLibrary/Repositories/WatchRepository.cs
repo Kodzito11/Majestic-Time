@@ -58,7 +58,7 @@ namespace WatchLibrary.Repositories
             return watches;
         }
 
-        public Watch GetById(int id)
+        public Watch? GetById(int id)
         {
             var conn = _dbConnection.GetConnection();
             var cmd = new SqlCommand("SELECT Id, Brand, Model, ReferenceNumber, Year, Functions, Size, Description, Price FROM Watches WHERE Id = @Id", conn);
