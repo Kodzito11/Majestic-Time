@@ -161,7 +161,6 @@ namespace WatchLibrary.Repositories
 
         public User Add(User user)
         {
-            // Hvis Password er null eller tom, kast en undtagelse
             if (string.IsNullOrWhiteSpace(user.Password))
             {
                 throw new ArgumentException("Password cannot be null or empty.", nameof(user.Password));
@@ -170,16 +169,14 @@ namespace WatchLibrary.Repositories
             user.ValidateSetPassword(user.Password); // Hasher password
             user.Validate(); // Validerer brugeren
 
-            //if (EmailExists(user.Email))
-            //{
-            //    throw new Exception("E-mailen er allerede i brug.");
-            //}
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("INSERT INTO Users (username, Email, Password, UserRole) VALUES (@username, @mail, @password, @role); SELECT SCOPE_IDENTITY()", conn);
+            var cmd = new SqlCommand("INSERT INTO Users (username, Email, PasswordHash, UserRole) VALUES (@username, @mail, @password, @userrole); SELECT SCOPE_IDENTITY()", conn);
+
+ 
             cmd.Parameters.AddWithValue("@username", user.Username);
             cmd.Parameters.AddWithValue("@mail", user.Email);
             cmd.Parameters.AddWithValue("@password", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@role", user.Role.ToString());
+            cmd.Parameters.AddWithValue("@UserRole", user.Role.ToString());
 
             try
             {
@@ -197,6 +194,7 @@ namespace WatchLibrary.Repositories
                 if (conn.State == ConnectionState.Open) conn.Close();
             }
         }
+
 
 
 
@@ -278,6 +276,61 @@ namespace WatchLibrary.Repositories
                 conn.Close();  // Close connection
             }
         }
+
+
+  
+        public User? AuthenticateUser(string email, string password)
+        {
+            // Hent brugeren med den givne email
+            var user = GetByEmail(email);
+
+            if (user == null)
+            {
+                throw new Exception("Brugeren findes ikke.");
+            }
+
+            // Brug VerifyPassword fra User-klassen til at validere adgangskoden
+            if (!user.VerifyPassword(password))
+            {
+                throw new Exception("Forkert adgangskode.");
+            }
+
+            // Returner brugeren, hvis autentificeringen lykkedes
+            return user;
+        }
+
+        // Kaldes, når en bruger indtaster forkert adgangskode
+        public void RegisterFailedLogin(User user)
+        {
+            // Øg tælleren for mislykkede loginforsøg
+            user.FailedAttempts++;
+
+            // Hvis brugeren har fejlet 3 gange eller mere
+            if (user.FailedAttempts >= 3)
+            {
+                // Beregn ventetiden: starter med 10 minutter og fordobles for hvert ekstra forsøg (eksponentielt)
+                var lockMinutes = 10 * (int)Math.Pow(2, user.FailedAttempts - 3);
+
+                // Sæt tidspunkt hvor brugeren bliver låst ude
+                user.LockoutEnd = DateTime.UtcNow.AddMinutes(lockMinutes);
+            }
+
+            // Opdater brugeren i databasen med de nye værdier
+            Update(user);
+        }
+
+        // Kaldes ved succesfuldt login for at nulstille loginforsøg
+        public void ResetLoginAttempts(User user)
+        {
+            // Nulstil tælleren for mislykkede loginforsøg
+            user.FailedAttempts = 0;
+
+            // Fjern eventuel låsning
+            user.LockoutEnd = null;
+
+            // Opdater brugeren i databasen
+            Update(user);
+        }
+
     }
-    
 }

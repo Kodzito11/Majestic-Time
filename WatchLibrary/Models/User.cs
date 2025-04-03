@@ -9,9 +9,9 @@ namespace WatchLibrary.Models
 
         public enum UserRole
         {
-            User,
-            Admin,
-            Guest
+            User = 0,
+            Admin = 1,
+            Guest = 2
         }
 
 
@@ -25,9 +25,10 @@ namespace WatchLibrary.Models
         [JsonIgnore]
         public string? PasswordHash { get; set; }
 
-        [JsonIgnore]
+       
 
         public UserRole Role { get; set; } = UserRole.User;
+        
         
         public string? Password { get; set; } // Tilføjet for at håndtere rå password
 
@@ -72,6 +73,8 @@ namespace WatchLibrary.Models
         }
 
 
+
+
         // Validate password
         public void ValidatePassword(string password)
         {
@@ -112,6 +115,8 @@ namespace WatchLibrary.Models
                 throw new ArgumentNullException(nameof(PasswordHash), "Password cannot be null");
 
         }
+
+    
 
         // Verify password
         public bool VerifyPassword(string password)
