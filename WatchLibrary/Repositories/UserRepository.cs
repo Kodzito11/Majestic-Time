@@ -226,46 +226,38 @@ namespace WatchLibrary.Repositories
             }
         }
 
-        public User? Update(User user)
+        public User? Update(User user, bool passwordChanged = false)
         {
-            if (string.IsNullOrEmpty(user.Password))
-            {
-                user.Password = "DefaultPassword1!"; // Updated default password to meet complexity requirements
-            }
-
-            try
-            {
-                // Validate the raw password before hashing
-                user.ValidatePassword(user.Password);
-                user.PasswordHash = Argon2.Hash(user.Password); // Hash the password
-                user.Validate();  // Validate user data
-            }
-            catch (ArgumentException ex)
-            {
-                throw new Exception("Password validation failed: " + ex.Message, ex);
-            }
-
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("UPDATE Users SET Username = @username, Email = @mail, PasswordHash = @password, UserRole = @role, FailedAttempts = @FailedAttempts, LockoutEnd = @LockoutEnd WHERE Id = @Id", conn);
+            var cmd = new SqlCommand("UPDATE Users SET Username = @username, Email = @mail, UserRole = @role, FailedAttempts = @FailedAttempts, LockoutEnd = @LockoutEnd WHERE Id = @Id", conn);
 
             cmd.Parameters.AddWithValue("@username", user.Username);
             cmd.Parameters.AddWithValue("@mail", user.Email);
-            cmd.Parameters.AddWithValue("@password", user.PasswordHash);
             cmd.Parameters.AddWithValue("@role", user.Role.ToString());
             cmd.Parameters.AddWithValue("@FailedAttempts", user.FailedAttempts);
             cmd.Parameters.AddWithValue("@LockoutEnd", user.LockoutEnd.HasValue ? (object)user.LockoutEnd.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@Id", user.Id);
 
+            if (passwordChanged)
+            {
+                // Validate the raw password before hashing
+                user.ValidatePassword(user.Password);
+                user.PasswordHash = Argon2.Hash(user.Password); // Hash the password
+                user.Validate(); // Validate user data
+                cmd.CommandText += ", PasswordHash = @password";
+                cmd.Parameters.AddWithValue("@password", user.PasswordHash);
+            }
+
             try
             {
                 conn.Open();
-                int rowsAffected = cmd.ExecuteNonQuery();  // Execute update command
+                int rowsAffected = cmd.ExecuteNonQuery(); 
 
                 if (rowsAffected > 0)
                 {
-                    return user;  // Return updated user
+                    return user; // Return updated user
                 }
-                return null;  // Return null if no user was updated (e.g., if ID does not exist)
+                return null; // Return null if no user was updated (if ID does not exist)
             }
             catch (Exception ex)
             {
@@ -273,12 +265,13 @@ namespace WatchLibrary.Repositories
             }
             finally
             {
-                conn.Close();  // Close connection
+                conn.Close(); 
             }
         }
 
 
-  
+
+
         public User? AuthenticateUser(string email, string password)
         {
             // Hent brugeren med den givne email
