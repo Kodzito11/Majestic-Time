@@ -8,6 +8,7 @@ namespace WatchLibrary.Models
     {
         public int WatchId { get; set; }
         public int Quantity { get; set; }
+        
         public decimal TotalPrice { get; set; }
         public int UserId { get; set; }
 
@@ -26,31 +27,29 @@ namespace WatchLibrary.Models
             }
         }
 
-       
+
         public void Validate()
         {
             ValidateCartItem();
 
-           
+            // Tillad UserId = 0 for gæster, men ikke negative værdier
+            if (UserId < 0)
+            {
+                throw new ArgumentException("Invalid UserId.", nameof(UserId));
+            }
+
             if (WatchId <= 0)
             {
                 throw new ArgumentException("Invalid WatchId.", nameof(WatchId));
             }
 
-            
             if (Quantity <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(Quantity), "Quantity must be greater than zero.");
             }
-
-            
-            if (UserId <= 0)
-            {
-                throw new ArgumentException("Invalid UserId.", nameof(UserId));
-            }
         }
 
-        
+
         public void CalculateTotalPrice(decimal pricePerItem)
         {
             if (pricePerItem <= 0)
