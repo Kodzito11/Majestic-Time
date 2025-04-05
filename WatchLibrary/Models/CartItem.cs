@@ -8,8 +8,10 @@ namespace WatchLibrary.Models
     {
         public int WatchId { get; set; }
         public int Quantity { get; set; }
-        
-        public decimal TotalPrice { get; set; }
+		public string? Brand { get; set; }
+		public string? Model { get; set; }
+
+		public decimal TotalPrice { get; set; }
         public int UserId { get; set; }
 
       
