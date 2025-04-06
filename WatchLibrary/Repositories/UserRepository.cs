@@ -25,7 +25,7 @@ namespace WatchLibrary.Repositories
         {
             var users = new List<User>();
             var conn = _dbConnection.GetConnection();
-            var cmd = new SqlCommand("SELECT Id, Username, Email, Password, UserRole FROM Users", conn);
+            var cmd = new SqlCommand("SELECT Id, Username, Email, PasswordHash, UserRole FROM Users", conn);
 
             try
             {
@@ -38,9 +38,8 @@ namespace WatchLibrary.Repositories
                         Id = reader.GetInt32(0),
                         Username = reader.GetString(1),
                         Email = reader.GetString(2),
-                        Password = reader.GetString(3),
+                        PasswordHash = reader.GetString(3),
                         Role = (UserRole)Enum.Parse(typeof(UserRole), reader.GetString(4)),
-
                     };
                     users.Add(user);
                 }
@@ -56,32 +55,29 @@ namespace WatchLibrary.Repositories
                 if (conn.State == ConnectionState.Open) conn.Close();
             }
         }
-        //public bool EmailExists(string email)
-        //{
-        //      var conn = _dbConnection.GetConnection();
-        //      var cmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Email = @Email", conn);
-        //      cmd.Parameters.AddWithValue("@Email", email);
 
-        //      try
-        //      {
-        //        conn.Open();
-        //        int count = (int)cmd.ExecuteScalar();
-        //        return count > 0;
-        //      }
-        //   catch (Exception ex)
-        //      {
+        public bool EmailExists(string email)
+        {
+            var conn = _dbConnection.GetConnection();
+            var cmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Email = @Email", conn);
+            cmd.Parameters.AddWithValue("@Email", email);
 
-        //       throw new Exception("Email Eksitrere", ex);
+            try
+            {
+                conn.Open();
+                int count = (int)cmd.ExecuteScalar(); // ExecuteScalar bruges til at returnere en enkelt værdi (i dette tilfælde antallet af rækker, der matcher e-mailen)
+                return count > 0; // Returnerer true, hvis der findes en eller flere brugere med den givne email
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Fejl ved kontrol af om e-mailen eksisterer", ex); // Kaster en mere specifik fejlbesked
+            }
+            finally
+            {
+                conn.Close(); // Sikrer at forbindelsen lukkes uanset hvad
+            }
+        }
 
-        //      }
-
-        //   finally
-        //      {
-
-        //       conn.Close();
-
-        //      }
-        //}
         public User? GetByEmail(string email)
         {
             var conn = _dbConnection.GetConnection();
